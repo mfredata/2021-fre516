@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>FRE516 Lab</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="October 29, 2021" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# FRE516 Lab
+## Power Query &amp; Financial Ratios Dashboard
+### October 29, 2021
+
+---
+
+
+&lt;style type="text/css"&gt;
+# CSS for including pauses in printed PDF output (see bottom of lecture)
+@media print {
+  .has-continuation {
+    display: block !important;
+  }
+}
+
+.remark-slide-scaler {
+    overflow-y: auto;
+}
+&lt;/style&gt;
+
+
+
+# Time Series
+
+- Trends and seasonality
+- Autocorrelation
+- Stationarity
+- Forecasting
+- Technical but fun and very applied stuff! 
+
+---
+
+# Lab Prep
+
+☑ Download files uploaded on Canvas
+
+☑ Go through the slides and try working through the example
+
+☑ Read the other assigned readings for this lab
+
+☑ If you are a Mac user, find a friend who has a Windows laptop and can run Power Query on their device and sit beside them during the lab! 
+
+---
+
+# Learning Outcomes
+
+- Import and consolidate data using Power Query
+- Automate data cleaning steps in Excel
+- Create a dashboard with slicers ("visual filters")
+- Update/Refresh tables with new data 
+
+---
+
+# Why Excel?
+
+&lt;img src="figs/apps.jpg" width="85%" style="display: block; margin: auto;" /&gt;
+
+---
+# Roadmap - Raw Data
+
+&lt;img src="figs/rawdata.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+# Roadmap - Tidy Data
+
+&lt;img src="figs/tidydata.png" width="85%" style="display: block; margin: auto;" /&gt;
+
+---
+# Roadmap - Dashboard
+
+&lt;img src="figs/dashboard_charts_new.gif" width="85%" style="display: block; margin: auto;" /&gt;
+
+---
+# Power Query
+
+“Power Query is a data transformation and data preparation engine. Power Query comes with a graphical interface for getting data from sources and a Power Query Editor for applying transformations.” 
+
+
+&lt;img src="figs/powerquery.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+.footnote[
+[1] [What is Power Query?](https://docs.microsoft.com/en-us/power-query/power-query-what-is-power-query)
+]
+
+
+---
+# Power Query
+
+Have any of you used Power Query in the past?
+
+What do you think are the advantages/disadvantages of using Power Query compared to R/Python?
+
+
+---
+
+# Why use Power Query?
+
+- Can fetch and consolidate data from various sources + update when you data comes in
+
+- Automate tasks without the need for VBA programming
+
+- Allows your GP partner to continue using your final output after you leave – legacy document
+
+---
+
+# Some challenges
+
+- Might not work well if the format of the data changes
+
+- Need to have Excel 2016 onwards
+
+- Can refresh data on Mac Excel, but cannot open Power Query editor
+
+---
+
+# Data setup
+
+- Create a "lab_516" folder and “data” sub-folder 
+- Download financial data in Morningstar website (in .xls) - [Starbucks](https://www.morningstar.com/stocks/xnas/sbux/financials) and [Blue Apron](https://www.morningstar.com/stocks/xnys/aprn/financials)
+  - Do not save these files in the “data” folder. Either save it in the "lab_516" folder or keep it in your “Downloads” folder
+- Open file in Excel -&gt; Click “Enable Editing” -&gt; Save As Excel workbook (.xlsx) in the “data” folder
+- Use meaningful file names – important for later!
+  - starbucks-cashflow.xlsx
+  - starbucks-balancesheet.xlsx
+  - starbucks-incomestatement.xlsx
+
+---
+
+# Go to Power Query in Excel
+
+- Open up a new Excel spreadsheet
+
+- Power Query Editor *will not* work if any of the files you will load is opened. 
+
+---
+
+# Suggested steps
+
+- Data tab -&gt; Get Data -&gt; From File -&gt; From Folder -&gt; Locate your "data" folder -&gt; "OK" 
+
+&lt;img src="figs/getdata.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+- Click "Transform Data"  
+
+&lt;img src="figs/transformdata.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Suggested steps
+
+Now your screen will look something like this
+
+![](figs/interface.png)
+
+---
+
+# Suggested steps
+
+We use the syntax **Excel.Workbook([Content])** to return the contents of the Excel workbook. 
+
+![](figs/expandcontent.png)
+
+---
+
+# Suggested steps
+
+- Delete irrelevant columns (keep only Name and Custom)
+  - Select columns to drop -&gt; Right click -&gt; Remove Columns
+- Expand Custom column 
+- Delete irrelevant columns (keep only Name, Custom.Data)
+- Expand Custom.Data column 
+- Click table icon on the upper left area of the table (above row numbers) -&gt; Use first row as headers
+  - third to last columns should be years now (i.e., 2016, 2017, ..., 2020)
+
+---
+
+# Suggested steps
+
+- Select the second column -&gt; Transform tab -&gt; Format -&gt; Trim (to align all to left)
+- Rename column to "Categories" -&gt; Filter values 
+  - unmark "APRN_cash-flow_Annual_As_Originally_Reported", "APRN_income-statement-Quarterly_Restated", etc.)
+- Add Column tab -&gt; Column From Examples -&gt; "Company" -&gt; "blueapron"
+  - We're using values in the first column to create this column
+  - Why naming our sheets with meaningful names is important
+- Add Column tab -&gt; Column From Examples -&gt; "Statement" -&gt; "balancesheet" 
+- Delete any irrelevant columns
+- Reorder columns
+
+---
+
+# Suggested steps
+
+- Select columns 2016-2020 - Transform tab -&gt; Unpivot columns
+- Convert "Value" column to numeric format
+- Rename "Attribute" to "Year" 
+
+&lt;img src="figs/unpivot.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Suggested steps
+
+- Click File -&gt; Close and Load
+- Now you will be back in Excel, with the tidy data in a Table
+- Rename sheet to "data"
+
+&lt;img src="figs/exceldata.png" width="53%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Excel PDF data connector
+
+There's apparently a way to read tables in PDF format into Excel. However, it's only available part of the Office 365 Subscription. 
+
+&lt;img src="figs/excel_pdf.png" width="53%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# R
+
+- R has a [`{tabulizer}`](https://datascienceplus.com/extracting-tables-from-pdfs-in-r-using-the-tabulizer-package/) package to read PDF tables
+  - Sadly didn't get it to work 😔 
+  - Ran into a few errors with `{rtools}` package too
+
+- R also has this super cool package called [`{datapasta}`](https://github.com/MilesMcBain/datapasta) where you can copy and paste tables into R, which R can read as a dataframe right away
+  - Does not work all the time; depends on the type of table on the back end
+  - Works with the historical stock price [table](https://finance.yahoo.com/quote/SBUX/history?p=SBUX) but not with the financial statements [table](https://finance.yahoo.com/quote/SBUX/financials?p=SBUX)
+
+
+---
+
+# Python
+
+- Python has a [`tabula-py`](https://tabula-py.readthedocs.io/en/latest/) package that allows you to read tables from PDF and convert them to a data frame. 
+
+&lt;img src="figs/starbucks_report.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="figs/python_df.png" width="65%" style="display: block; margin: auto;" /&gt;
+
+.footnote[
+[1] [Starbucks Financial Data](https://investor.starbucks.com/financial-data/annual-reports/default.aspx)
+]
+
+---
+
+# Python
+
+- Who knows when else you might need a function or package that is more accessible or easier to use in Python than in R (or other software)?
+
+- Come to the Python workshops on November 8 and 15!
+
+&lt;img src="figs/scanned_spreadsheets.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Suggested steps
+
+- The next steps would be to create a pivot table containing financial ratios
+- We will use custom formulas in Excel's pivot table (specifically Calculated Item)
+- Read more about Calculated Item [here](https://support.microsoft.com/en-us/office/calculate-values-in-a-pivottable-11f41417-da80-435c-a5c6-b0185e59da77) or [here](https://www.contextures.com/calculatedfieldcalculateditem.html)
+
+---
+
+# Suggested steps
+
+1. Click anywhere on the Table -&gt; Insert tab -&gt; Pivot Table -&gt; OK
+2. Drag Year to Filters, Company to Columns, Category to Rows, Value to Values
+3. Click anywhere on the cell of your Pivot Table (e.g., cell A5)
+4. Analyze tab -&gt; Fields, Items, &amp; Sets -&gt; Calculated Item
+
+&lt;img src="figs/calculateditem.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Suggested steps
+
+- Type in the relevant formula of the ratio
+  - Use meaningful names
+  - Can be tricky with the category names (i.e., "Total Operating Profit/Loss" value is different from "Total Operating Profit/Loss, Supplemental")
+  
+&lt;img src="figs/currentratio.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Formulas
+
+1. Current Ratio = 'Total Current Assets' /'Total Current Liabilities’
+2. Interest Coverage ='Total Operating Profit/Loss as Reported, Supplemental'/'Interest Expense Net of Capitalized Interest'
+3. Debt ratio = 'Total Liabilities'/'Total Assets’
+4. Profit margin (using operating profits) = 'Total Operating Profit/Loss as Reported, Supplemental'/ 'Total Revenue as Reported, Supplemental'
+5. Profit margin (using net income) = 'Net Income Available to Common Stockholder' / 'Total Revenue as Reported, Supplemental'
+
+---
+
+# Suggested steps
+
+- After you have created your formulas, go back to your Pivot Table and filter to those values only in "Categories"
+  - I moved "Year" to Columns to show all values
+- Looks like something is wrong with the Blue Apron calculation
+
+![](figs/pivot_error.png)
+
+---
+
+# Suggested steps
+
+- Upon closer look of the Net Income Statement, Starbucks has a "Interest Expense Net of Capitalized Interest" but Blue Apron does not.
+- Both have "Net Interest Income/Expense"
+- For this exercise, I will just use this variable (i.e., Net Interest Income/Expense) to calculate "Interest Coverage"
+- To modify the formula, open up Calculated Item -&gt; Interest Coverage -&gt; Change the formula -&gt; Modify -&gt; OK
+
+&lt;img src="figs/calculateditem_modify.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# What would Janelle say?
+
+- Any suggestions on how to "clean up" this table? 
+
+![](figs/janelle.png)
+
+---
+
+# What would Janelle say?
+
+- Center align the column headings
+- Right align the numbers
+- Show only 2 decimal places (or industry convention)
+- Modify text, as needed
+
+![](figs/janelle_fixed.png)
+
+---
+
+# Creating Pivot Charts
+
+- Since we want one chart per ratio, we should just create separate Pivot Tables where each Pivot Table will contain the value of one financial ratio.
+- For each Pivot Table, insert a Pivot Chart and format the chart (e.g., use themes, 2 decimal places only, add data labels, delete axis labels, chart titles, etc.)
+- It is a good idea to label your Pivot Tables with meaningful names also (Analyze Tab -&gt; rename "PivotTable1" to "currentratio")
+  - Useful for later when we connect different charts with a slicer
+- To "clone" a Pivot Table, select a Pivot Table -&gt; Analyze tab -&gt; Select -&gt; Entire Pivot Table -&gt; Ctrl + C -&gt; Ctrl + V
+- Right click on any of the buttons (e.g., "Year", "Sum of Value") -&gt; "Hide All Field Buttons on Chart"
+
+---
+
+# Creating Pivot Charts
+
+- Here's my current worksheet (called charts)
+
+![](figs/pivotcharts.png)
+
+---
+
+# Creating a dashboard
+
+- Slicers allow you or your users to filter data and visualizations. 
+- You can also choose which Pivot Tables and/or Pivot Charts are connected by the slicer. 
+
+.footnote[
+[1] [Slicers in Power BI](https://docs.microsoft.com/en-us/power-bi/visuals/power-bi-visualization-slicers)
+
+[2] [Use slicers to filter data](https://support.microsoft.com/en-us/office/use-slicers-to-filter-data-249f966b-a9d5-4b0f-b31a-12651785d29d)
+
+]
+---
+
+# Creating a dashboard
+
+- Create a new sheet called dashboard
+- View tab -&gt; Unmark "Gridlines" so the sheet will just be white
+- Copy your four Pivot Charts from the charts sheet to the dashboard sheet
+- Click any Pivot Chart -&gt; Insert tab -&gt; **Slicer** -&gt; Check "Year"
+- Right click Slicer -&gt; **Report Connections** -&gt; check all relevant Pivot Charts
+  - Why it's important to use meaningful Pivot Table names
+- Based on the "Year" you select, the chart's values will change  
+
+---
+
+# Updating your dashboard
+
+- Add the spreadsheets to your "data" folder
+- In Excel, Data tab -&gt; "Refresh All" (2x) 
+
+&lt;img src="figs/refreshing.gif" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Updating your dashboard
+
+- What's going on in the background?
+- Recall that in our data setup, we asked Excel to get data from the "data" folder
+- So every time we click "Refresh", Excel goes into that "data" folder and performs the Power Query steps that we have applied
+
+.footnote[
+[1] [Data Refresh in Power BI](https://docs.microsoft.com/en-us/power-bi/connect-data/refresh-data)
+]
+
+---
+
+# Troubleshooting 
+
+- What if you renamed your "data" folder or moved it to a different location in your computer? 
+- When you click "Refresh," you will get this error
+
+&lt;img src="figs/datafoldererror.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Troubleshooting 
+
+- Go to your data sheet -&gt; Click anywhere on the table -&gt; Query tab -&gt; Edit
+- Under Applied Steps on the right panel, click "Source" 
+- In the formula, edit the file path to your "data" folder -&gt; Enter
+
+---
+
+# Recap
+
+- Downloaded financial statements from Morningstar (could be financial statements or any spreadsheets too)
+- Imported and consolidated data using Power Query
+- Automated steps to transform raw data to tidy data
+- Calculated financial ratios using Excel's calculated fields
+- Built Pivot Tables and Pivot Charts and a Dashboard that updates with new data
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
